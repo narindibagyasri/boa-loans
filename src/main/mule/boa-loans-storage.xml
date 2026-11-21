@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<flow name="boa-loans-storageFlow" doc:id="ea9fbde1-442c-49c0-a7fd-267cf301dc63" >
+		<os:contains doc:name="checkExistingLoans" doc:id="3da267fb-2389-4394-8138-1287e08fc2bb" objectStore="Loans_Object_store" key="#[vars.initialPayload.customer_id]" target="cLoans"/>
+		<choice doc:name="Choice" doc:id="1dee07b3-4f01-46b2-98bd-0d83b038736c" >
+			<when expression="#[vars.cLoans == true]">
+				<os:retrieve doc:name="RetrieveExistingLoans" doc:id="b86b09db-0026-44ed-8abc-17c297248ca6" key="#[vars.initialPayload.customer_id]" objectStore="Loans_Object_store" target="existingcLoans">
+					<os:default-value ><![CDATA[#[[]]]]></os:default-value>
+				</os:retrieve>
+				<ee:transform doc:name="updatedLoans" doc:id="6c8d482a-e66f-47aa-88f7-35622c11cc59" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="updatedLoans" ><![CDATA[%dw 2.0
+output application/json
+---
+vars.existingcLoans ++ vars.loanApplication]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<os:store doc:name="Store Valid Loans" doc:id="18ddfa6c-b8c7-4eed-a3a7-4505f5d71f05" key="#[vars.initialPayload.customer_id]" objectStore="Loans_Object_store">
+			<os:value><![CDATA[#[vars.updatedLoans]]]></os:value>
+		</os:store>
+				
+			</when>
+			<otherwise >
+				<os:store doc:name="Store Valid Loan" doc:id="bbda5a13-3f83-496c-b437-2edabdd7d023" key="#[vars.initialPayload.customer_id]" objectStore="Loans_Object_store" >
+					<os:value ><![CDATA[#[vars.loanApplication]]]></os:value>
+				</os:store>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="finalResponse">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  customer_id: vars.initialPayload.customer_id,
+  credit_score: vars.credInfo.credit_score,
+  loan_id: vars.loanApplication.loan_id[0],
+  message: vars.initialPayload.loan_type ++ "Loan account created successfully"
+} as Object {encoding: "UTF-8", mediaType: "application/json"}
+]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        </flow>
+</mule>

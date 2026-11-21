@@ -1,0 +1,31 @@
+#%RAML 1.0 DataType
+type: object
+properties:
+          customer_id:
+            type: string
+          customer_fname:
+            type: string
+          customer_lname:
+            type: string
+          loan_type:
+            type: string
+            enum: ["PERSONAL", "HOME", "VEHICLE", "GOLD"]
+          loan_amount:
+            type: number
+          tenure:
+            type: number
+          interest:    
+            type: number
+          email:
+            type: string
+            required: false
+example:
+          {
+            "customer_id": "AADHAR_1234",
+            "customer_fname": "Aryakanthi",
+            "customer_lname": "Akash",
+            "loan_type": "GOLD",
+            "loan_amount": 500000,
+            "tenure": 60,
+            "interest": 8.5
+          }

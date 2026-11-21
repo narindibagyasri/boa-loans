@@ -1,0 +1,15 @@
+%dw 2.0
+
+type auto_ea9fbde1_442c_49c0_a7fd_267cf301dc63_Output_Variables_loanApplication = {
+  customer_fname: String, 
+  customer_id: String, 
+  customer_lname: String, 
+  email?: String, 
+  interest: Number, 
+  loan_amount: Number, 
+  loan_id: String, 
+  loan_type: String, 
+  tenure: Number, 
+  _?: Any
+}
+

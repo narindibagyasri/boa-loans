@@ -1,0 +1,99 @@
+#%RAML 1.0
+title: boa-loans-api
+#baseUri: https://www.boa.com/api
+version: 1.0.0
+protocols:
+  - HTTP
+  - HTTPS
+#raml reuability concepts includes types, traits, resourceTypes
+securitySchemes:
+  auth:
+    type: OAuth 2.0
+types:
+  respData: !include /reusableFiles/example.raml
+  inpSchema: !include /reusableFiles/createLoanAC.raml
+  successResp: !include /reusableFiles/successLoanAC201.raml
+  clientF1: !include /reusableFiles/CF400.raml
+  clientF2: !include /reusableFiles/CF404.raml
+  clientF3: !include /reusableFiles/CF429.raml  
+  serverF1: !include /reusableFiles/SF500.raml
+  serverF2: !include /reusableFiles/SF503.raml
+traits:
+  client-info: !include /reusableFiles/clientHeaders.raml
+  requestQuery: !include /reusableFiles/inpQuery.raml
+resourceTypes:
+  loan_idInfo: !include /reusableFiles/loan_idresourceTypes.raml
+/loans:
+  post:
+    is:
+      - client-info
+    securedBy:
+      - auth 
+    description: To create loan accounts for 4 types of loans
+    body:
+      application/json: 
+        type: inpSchema
+    responses:
+      201:
+        body:
+          application/json:
+            type: successResp
+      400:
+        body:
+          application/json:
+            type: clientF1
+      404:
+        body:
+          application/json:
+            type: clientF2
+
+      429:
+        body:
+          application/json:
+            type: clientF3
+      500:
+        body:
+          application/json:
+            type: serverF1
+      503:
+        body:
+          application/json:
+            type: serverF2
+  /{loan_type}:
+    uriParameters:
+      loan_type:
+        enum: ["PERSONAL", "HOME", "VEHICLE", "GOLD"]
+        type: string
+    get:
+      description: To retrieve the loan details of a particular loan for a customer
+      is:
+        - client-info
+        - requestQuery
+      securedBy:
+        - auth       
+      responses:
+        200:
+          body:
+            application/json:
+              type: respData
+              
+    /{loan_id}:
+      uriParameters: 
+        loan_id:
+          type: string
+      type: loan_idInfo
+
+
+/heathcheck:
+  get:
+    responses:
+     200:
+      body:
+        application/json:
+          example:
+            {
+              "message": "API is live"
+            }
+      
+
+     

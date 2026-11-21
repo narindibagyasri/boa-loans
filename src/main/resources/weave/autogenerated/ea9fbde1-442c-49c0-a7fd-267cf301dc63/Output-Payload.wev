@@ -1,0 +1,8 @@
+%dw 2.0
+
+type auto_ea9fbde1_442c_49c0_a7fd_267cf301dc63_Output_Payload = {
+  message: String, 
+  loan_id: String, 
+  _?: Any
+}
+
